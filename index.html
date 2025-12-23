@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Freemie | Portfolio</title>
+    <meta name="description" content="Freemie — portfolio, projects, and a real in-browser SQL console." />
+
+    <style>
+      :root {
+        --bg: #0b0c10;
+        --panel: #12141a;
+        --text: #eef1ff;
+        --muted: #a8b0c7;
+        --border: rgba(255, 255, 255, 0.10);
+        --accent: #7c5cff;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --danger: rgba(255, 85, 85, 0.22);
+      }
+
+      html[data-theme="light"] {
+        --bg: #f6f7fb;
+        --panel: #ffffff;
+        --text: #141824;
+        --muted: #5c647a;
+        --border: rgba(10, 10, 20, 0.14);
+        --accent: #5a3dff;
+        --shadow: 0 10px 30px rgba(10, 10, 20, 0.08);
+        --danger: rgba(255, 85, 85, 0.18);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      a { color: inherit; text-decoration: none; }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 4vw;
+        background: rgba(0,0,0,0.22);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      html[data-theme="light"] .topbar {
+        background: rgba(255,255,255,0.75);
+      }
+
+      .brand { display: flex; align-items: baseline; gap: 12px; }
+      .logo { font-weight: 850; letter-spacing: 0.2px; }
+      .tagline { font-size: 0.92rem; color: var(--muted); }
+
+      .nav { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+      .nav a { color: var(--muted); }
+      .nav a:hover { color: var(--text); }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--accent);
+        color: white;
+        font-weight: 650;
+        box-shadow: var(--shadow);
+        cursor: pointer;
+      }
+
+      .btn.ghost { background: transparent; color: var(--text); box-shadow: none; }
+      .btn.small { padding: 8px 10px; border-radius: 10px; }
+
+      .wrap {
+        width: min(1020px, 92vw);
+        margin: 0 auto;
+        padding: 24px 0 70px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .hero-text h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin: 0 0 10px;
+      }
+
+      .hero-text p { margin: 0 0 16px; color: var(--muted); }
+
+      .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero-card h2 { margin: 0 0 8px; font-size: 1.1rem; }
+      .muted { color: var(--muted); }
+
+      .facts {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0 0;
+        display: grid;
+        gap: 8px;
+      }
+
+      .facts li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+        color: var(--muted);
+      }
+
+      .section { margin-top: 44px; }
+      .section-head h2 { margin: 0 0 6px; }
+
+      .toolbar {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .search {
+        flex: 1;
+        min-width: 240px;
+        padding: 12px 12px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        outline: none;
+      }
+
+      .count { color: var(--muted); font-size: 0.95rem; }
+
+      .grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .project-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .project-title h3 { margin: 0; font-size: 1.15rem; }
+
+      .badge {
+        font-size: 0.8rem;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        font-size: 0.8rem;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+
+      .links {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+
+      .links a {
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 8px 10px;
+        border-radius: 12px;
+      }
+
+      .links a:hover {
+        border-color: rgba(124, 92, 255, 0.55);
+      }
+
+      .empty {
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        color: var(--muted);
+      }
+
+      .hidden { display: none; }
+
+      .contact { display: flex; flex-wrap: wrap; gap: 12px; }
+
+      .footer {
+        margin-top: 56px;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      /* SQL Console */
+      .sqlbox {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      textarea.sql {
+        width: 100%;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        outline: none;
+        resize: vertical;
+        min-height: 96px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95rem;
+      }
+
+      .sqlbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .sqlstatus { color: var(--muted); }
+
+      .sqlout {
+        overflow: auto;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+      }
+
+      table.sqltable {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--panel);
+      }
+
+      table.sqltable th, table.sqltable td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(127,127,127,0.18);
+        white-space: nowrap;
+      }
+
+      table.sqltable th {
+        position: sticky;
+        top: 0;
+        background: var(--panel);
+        border-bottom: 1px solid rgba(127,127,127,0.35);
+      }
+
+      .errbox {
+        padding: 12px;
+        border: 1px solid var(--danger);
+        border-radius: 14px;
+        background: rgba(255, 85, 85, 0.06);
+      }
+
+      @media (max-width: 820px) {
+        .hero { grid-template-columns: 1fr; }
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <a class="logo" href="./">Freemie</a>
+        <span class="tagline">Portfolio</span>
+      </div>
+
+      <nav class="nav">
+        <a href="#projects">Projects</a>
+        <a href="#sql">SQL</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <button id="themeBtn" class="btn small" type="button" aria-label="Toggle theme">Theme</button>
+      </nav>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <div class="hero-text">
+          <h1>Hey, I’m Freemie.</h1>
+          <p>
+            This is my GitHub Pages portfolio built with plain HTML, CSS, and JavaScript.
+            The project cards are generated in JavaScript, and there’s a real SQL console below that runs SQLite directly in the browser.
+          </p>
+          <div class="hero-actions">
+            <a class="btn" href="#projects">View projects</a>
+            <a class="btn ghost" href="https://github.com/freemie" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+        </div>
+
+        <div class="card hero-card">
+          <h2>Quick info</h2>
+          <p class="muted" style="margin:0;">
+            No frameworks here. Simple on purpose so I can explain every part.
+          </p>
+          <ul class="facts">
+            <li><span>Host</span><span>GitHub Pages</span></li>
+            <li><span>Search</span><span>Client-side</span></li>
+            <li><span>Theme</span><span>Saved locally</span></li>
+            <li><span>SQL</span><span>Real SQLite (WASM)</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="projects" class="section">
+        <div class="section-head">
+          <h2>Projects</h2>
+          <p class="muted">Type to filter by title, description, tags, or status.</p>
+        </div>
+
+        <div class="toolbar">
+          <input
+            id="searchBox"
+            class="search"
+            type="search"
+            placeholder="Search… (example: python, ML, visualization)"
+            autocomplete="off"
+          />
+          <span id="countLabel" class="count">Loading…</span>
+        </div>
+
+        <div id="projectsGrid" class="grid"></div>
+
+        <div id="emptyState" class="empty hidden">
+          <p>No matches. Try a different keyword.</p>
+        </div>
+      </section>
+
+      <section id="sql" class="section">
+        <div class="section-head">
+          <h2>SQL Console</h2>
+          <p class="muted">
+            This runs real SQLite in your browser. Try:
+            <code>SELECT * FROM projects WHERE id = 1;</code>
+          </p>
+        </div>
+
+        <div class="card sqlbox">
+          <textarea id="sqlInput" class="sql" spellcheck="false">SELECT * FROM projects WHERE id = 1;</textarea>
+
+          <div class="sqlbar">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="runSqlBtn" class="btn" type="button">Run query</button>
+              <button id="resetSqlBtn" class="btn ghost" type="button">Reset DB</button>
+            </div>
+            <span id="sqlStatus" class="sqlstatus">Loading SQLite…</span>
+          </div>
+
+          <div id="sqlOutput" class="sqlout hidden"></div>
+        </div>
+      </section>
+
+      <section id="about" class="section">
+        <div class="section-head">
+          <h2>About</h2>
+          <p class="muted">
+            Replace this with your real bio (major, interests, and the kinds of roles you want).
+          </p>
+        </div>
+
+        <div class="card">
+          <p style="margin:0;">
+            I’m a student interested in data science and software engineering. I like building projects that combine
+            analysis, clean code, and real user-facing value.
+          </p>
+        </div>
+      </section>
+
+      <section id="contact" class="section">
+        <div class="section-head">
+          <h2>Contact</h2>
+          <p class="muted">Fill in your email and LinkedIn. Optional resume PDF link too.</p>
+        </div>
+
+        <div class="contact">
+          <a class="btn ghost" href="mailto:your_email_here@example.com">Email</a>
+          <a class="btn ghost" href="https://www.linkedin.com/in/your-link-here/" target="_blank" rel="noreferrer">
+            LinkedIn
+          </a>
+          <a class="btn ghost" href="https://github.com/freemie" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>© <span id="year"></span> Freemie</span>
+        <span>Built for Solo Sprint 2</span>
+      </footer>
+    </main>
+
+    <!-- SQLite in the browser (sql.js) -->
+    <script src="https://unpkg.com/sql.js@1.13.0/dist/sql-wasm.js"></script>
+
+    <script>
+      // -----------------------
+      // Your project data here
+      // -----------------------
+      // Keep IDs unique. SQL correctness depends on that.
+      const PROJECTS = [
+        {
+          id: 1,
+          title: "Fraud Detection Dashboard",
+          description: "Prototype that flags scam patterns across messages using simple rules + ML ideas.",
+          tags: ["Python", "NLP", "Security"],
+          repo: "https://github.com/freemie",
+          demo: "",
+          writeup: "",
+          status: "in progress"
+        },
+        {
+          id: 2,
+          title: "Campus Rideshare Concept",
+          description: "Concept for verified student drivers, transparent cost-sharing, and safety-first features.",
+          tags: ["JavaScript", "Product", "Design"],
+          repo: "https://github.com/freemie",
+          demo: "",
+          writeup: "",
+          status: "concept"
+        }
+      ];
+
+      // -----------------------
+      // Theme + footer year
+      // -----------------------
+      const themeBtn = document.getElementById("themeBtn");
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      (function initTheme() {
+        const saved = localStorage.getItem("theme");
+        if (saved === "light" || saved === "dark") {
+          document.documentElement.setAttribute("data-theme", saved);
+        } else {
+          const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+          document.documentElement.setAttribute("data-theme", prefersLight ? "light" : "dark");
+        }
+      })();
+
+      themeBtn.addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme") || "dark";
+        const next = current === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+      });
+
+      // -----------------------
+      // Projects UI (search + render)
+      // -----------------------
+      const grid = document.getElementById("projectsGrid");
+      const searchBox = document.getElementById("searchBox");
+      const countLabel = document.getElementById("countLabel");
+      const emptyState = document.getElementById("emptyState");
+
+      function normalize(s) {
+        return String(s || "").toLowerCase().trim();
+      }
+
+      function matchesQuery(p, q) {
+        if (!q) return true;
+        const text = [
+          p.title,
+          p.description,
+          (p.tags || []).join(" "),
+          p.status
+        ].join(" ").toLowerCase();
+        return text.includes(q);
+      }
+
+      function makeProjectCard(p) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const titleRow = document.createElement("div");
+        titleRow.className = "project-title";
+
+        const h3 = document.createElement("h3");
+        h3.textContent = p.title || "Untitled project";
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = p.status || "project";
+
+        titleRow.appendChild(h3);
+        titleRow.appendChild(badge);
+
+        const desc = document.createElement("p");
+        desc.className = "muted";
+        desc.style.margin = "10px 0 0";
+        desc.textContent = p.description || "No description yet.";
+
+        const tagsWrap = document.createElement("div");
+        tagsWrap.className = "tags";
+
+        (p.tags || []).slice(0, 10).forEach((t) => {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = t;
+          tagsWrap.appendChild(tag);
+        });
+
+        const links = document.createElement("div");
+        links.className = "links";
+
+        function addLink(label, url) {
+          if (!url) return;
+          const a = document.createElement("a");
+          a.href = url;
+          a.target = "_blank";
+          a.rel = "noreferrer";
+          a.textContent = label;
+          links.appendChild(a);
+        }
+
+        addLink("Repo", p.repo);
+        addLink("Live demo", p.demo);
+        addLink("Write-up", p.writeup);
+
+        card.appendChild(titleRow);
+        card.appendChild(desc);
+        if ((p.tags || []).length) card.appendChild(tagsWrap);
+        if (links.children.length) card.appendChild(links);
+
+        return card;
+      }
+
+      function renderProjects(list) {
+        grid.innerHTML = "";
+        list.forEach((p) => grid.appendChild(makeProjectCard(p)));
+
+        countLabel.textContent = `${list.length} project${list.length === 1 ? "" : "s"}`;
+        emptyState.classList.toggle("hidden", list.length !== 0);
+      }
+
+      function applySearch() {
+        const q = normalize(searchBox.value);
+        renderProjects(PROJECTS.filter((p) => matchesQuery(p, q)));
+      }
+
+      searchBox.addEventListener("input", applySearch);
+      renderProjects(PROJECTS);
+
+      // -----------------------
+      // Real SQL (SQLite via sql.js)
+      // -----------------------
+      const sqlStatus = document.getElementById("sqlStatus");
+      const sqlOutput = document.getElementById("sqlOutput");
+      const runSqlBtn = document.getElementById("runSqlBtn");
+      const resetSqlBtn = document.getElementById("resetSqlBtn");
+      const sqlInput = document.getElementById("sqlInput");
+
+      let db = null;
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function renderSqlTable(columns, rows) {
+        const head = `<thead><tr>${columns
+          .map((c) => `<th>${escapeHtml(c)}</th>`)
+          .join("")}</tr></thead>`;
+
+        const body = `<tbody>${rows
+          .map(
+            (r) =>
+              `<tr>${r
+                .map((cell) => `<td>${escapeHtml(cell ?? "")}</td>`)
+                .join("")}</tr>`
+          )
+          .join("")}</tbody>`;
+
+        return `<table class="sqltable">${head}${body}</table>`;
+      }
+
+      function seedDatabase() {
+        if (!db) return;
+
+        db.run(`
+          DROP TABLE IF EXISTS projects;
+          CREATE TABLE projects (
+            id INTEGER PRIMARY KEY,
+            title TEXT NOT NULL,
+            description TEXT,
+            tags TEXT,
+            repo TEXT,
+            demo TEXT,
+            writeup TEXT,
+            status TEXT
+          );
+        `);
+
+        const stmt = db.prepare(
+          "INSERT INTO projects (id, title, description, tags, repo, demo, writeup, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+        );
+
+        for (const p of PROJECTS) {
+          stmt.run([
+            p.id,
+            p.title || "",
+            p.description || "",
+            (p.tags || []).join(","),
+            p.repo || "",
+            p.demo || "",
+            p.writeup || "",
+            p.status || ""
+          ]);
+        }
+        stmt.free();
+      }
+
+      async function initSqlite() {
+        try {
+          sqlStatus.textContent = "Loading SQLite…";
+
+          const SQL = await initSqlJs({
+            locateFile: (file) => `https://unpkg.com/sql.js@1.13.0/dist/${file}`
+          });
+
+          db = new SQL.Database();
+          seedDatabase();
+
+          sqlStatus.textContent = "SQLite ready.";
+          // Run the default query once so you can see it working immediately
+          runQuery(sqlInput.value);
+        } catch (e) {
+          sqlStatus.textContent = "Failed to load SQLite.";
+          sqlOutput.classList.remove("hidden");
+          sqlOutput.innerHTML = `<div class="errbox"><strong>Error:</strong> ${escapeHtml(e?.message || String(e))}</div>`;
+        }
+      }
+
+      function runQuery(sql) {
+        if (!db) return;
+
+        sqlOutput.classList.add("hidden");
+        sqlOutput.innerHTML = "";
+        sqlStatus.textContent = "";
+
+        try {
+          const results = db.exec(sql);
+
+          if (!results.length) {
+            sqlStatus.textContent = "Query ran. Returned 0 rows.";
+            return;
+          }
+
+          const first = results[0];
+          const cols = first.columns;
+          const rows = first.values;
+
+          sqlStatus.textContent = `Query ran. Returned ${rows.length} row${rows.length === 1 ? "" : "s"}.`;
+          sqlOutput.classList.remove("hidden");
+          sqlOutput.innerHTML = renderSqlTable(cols, rows);
+        } catch (err) {
+          sqlStatus.textContent = "SQL error.";
+          sqlOutput.classList.remove("hidden");
+          sqlOutput.innerHTML = `<div class="errbox"><strong>Error:</strong> ${escapeHtml(err?.message || String(err))}</div>`;
+        }
+      }
+
+      runSqlBtn.addEventListener("click", () => runQuery(sqlInput.value));
+
+      resetSqlBtn.addEventListener("click", () => {
+        if (!db) return;
+        seedDatabase();
+        sqlStatus.textContent = "Database reset.";
+        runQuery("SELECT * FROM projects;");
+      });
+
+      initSqlite();
+    </script>
+  </body>
+</html>
